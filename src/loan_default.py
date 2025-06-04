@@ -2,7 +2,7 @@
 # General and ML libraries
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report
 import os
 import sys
@@ -12,47 +12,20 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
+from preprocess import process_data
 
     # Add the absolute pass of the package to the system path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
-# 1. Load the data
+### 1. Load the data
 file_path = os.path.join(project_root, "data/")
 df = pd.read_csv(file_path + "SBAcase.11.13.17.csv")
 
 ### 2. Data Preparation
 
-# 2.1 Impute missing target values
-
-df.ChgOffDate.fillna(-1, inplace = True)
-df['Was_Charged_Off'] = df.ChgOffDate.apply(lambda x: 0 if x == -1 else 1)
-
-# 2.2 Make other binary (Y and N) categorical variables consistent. We kn02 0 means N but A or S can't be interpreted.
-
-df.RevLineCr = df.RevLineCr.apply(lambda x: "N" if x == "0" else "Y" if x == "T" else x)
-# First convert values to string and remove possible leading or trailing spaces
-df.LowDoc = df.LowDoc.astype(str).str.strip()
-df.LowDoc = df.LowDoc.apply(lambda x: "N" if x == "0" else float('nan') if x in ["A", "S"] else x)
-
-# 2.3 Pruning
-
-# Drop irrelevant 
-df.drop(columns=["Name", "City", "Bank", "BankState", "NAICS", "ApprovalDate", 
-                 "ApprovalFY", "Zip", "State"], inplace=True, errors='ignore')
-
-# Drop the few observations with missing column values
-df.dropna(inplace=True)
-
-# 2.4 Encoding
-
-# Encode target
-df["MIS_Status"] = LabelEncoder().fit_transform(df["MIS_Status"])
-
-# Encode categoricals
-for col in df.select_dtypes(include="object"):
-    df[col] = LabelEncoder().fit_transform(df[col])
+df = process_data(df)
 
 # 2.5 Split and normalize: We'll keep part of data for validation and another part for the final testing
 

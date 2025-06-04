@@ -57,7 +57,7 @@ Files:
 
 The dev folder includes the development notebook with all the EDA and model development stage.
 The dataset is in the data folder.
-The production code is in src folder.
+The production code is in src folder. A file to reprocess the data and the main code (loan_default.py) to train, validate and test the mmodel.
 
 
 
